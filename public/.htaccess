@@ -1,0 +1,20 @@
+# GeoRoute Manager — Built Frontend (.htaccess for dist/)
+# Overrides leftover WordPress index.php rewrite rules if DocumentRoot points to dist/.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # If Apache serves dist/ directly and proxies /api to Node.js on 127.0.0.1:3000:
+  <IfModule mod_proxy.c>
+    RewriteCond %{REQUEST_URI} ^(.*/)?api(/.*)?$ [NC]
+    RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+  </IfModule>
+
+  # SPA history fallback (serve existing static assets directly; fallback others to index.html)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^(.*/)?api(/.*)?$ [NC]
+  RewriteRule ^ index.html [L]
+</IfModule>

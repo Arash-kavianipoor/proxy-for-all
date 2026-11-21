@@ -1,0 +1,24 @@
+# GeoRoute Manager — Root Apache / cPanel Protection Rules
+# Safely protects database, secrets, and backend files when extracted directly
+# into public_html or /var/www/html, without blocking CloudLinux Passenger.
+
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(\.env.*|\.georoute-.*|\.git.*|startup-error\.log|package(-lock)?\.json|tsconfig\.json|metadata\.json|README\.md|INSTALL_GUIDE_FA\.txt|vite\.config\.ts|server\.ts|app\.cjs|.*\.mjs|.*\.db(-wal|-shm)?|.*\.sqlite.*)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(\.env.*|\.georoute-.*|\.git.*|startup-error\.log|package(-lock)?\.json|tsconfig\.json|metadata\.json|README\.md|INSTALL_GUIDE_FA\.txt|vite\.config\.ts|server\.ts|app\.cjs|.*\.mjs|.*\.db(-wal|-shm)?|.*\.sqlite.*)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Block direct HTTP access to backend code, compiled server, migrations, and SQLite data directory
+  RewriteRule ^(data|dist-server|server|src|migrations|tests|node_modules|deploy|docs)(/|$) - [F,L,NC]
+</IfModule>
